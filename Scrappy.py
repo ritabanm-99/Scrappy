@@ -3,6 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from collections import Counter
+import nltk
+from nltk.corpus import stopwords
+import re
+
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
 # Function to scrape headings and content from a URL
 def scrape_content(url):
@@ -32,6 +39,12 @@ def generate_wordcloud(text):
     wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
     return wordcloud
 
+# Function to clean text and count word frequencies
+def count_keywords(text):
+    words = re.findall(r'\w+', text.lower())  # Extract words and convert to lowercase
+    filtered_words = [word for word in words if word not in stop_words and len(word) > 1]  # Remove stopwords and single characters
+    return Counter(filtered_words)
+
 # Streamlit app
 st.title('Webpage Content Scraper and Word Cloud Generator')
 
@@ -46,6 +59,7 @@ if st.button('Scrape Content'):
             st.write(headings)
             
             full_text = ' '.join(headings + content)
+            word_count = count_keywords(full_text)
             
             # Generate and display the word cloud
             st.subheader('Word Cloud of Content')
@@ -53,6 +67,18 @@ if st.button('Scrape Content'):
             plt.figure(figsize=(10, 5))
             plt.imshow(wordcloud, interpolation='bilinear')
             plt.axis('off')
+            st.pyplot(plt)
+            
+            # Generate and display the bar chart for top 10 words
+            st.subheader('Top 10 Keywords')
+            most_common_words = word_count.most_common(10)
+            words, counts = zip(*most_common_words)
+            plt.figure(figsize=(10, 5))
+            plt.bar(words, counts, color='blue')
+            plt.xlabel('Keywords')
+            plt.ylabel('Frequency')
+            plt.title('Top 10 Keywords Frequency')
+            plt.xticks(rotation=45)
             st.pyplot(plt)
     else:
         st.error("Please enter a URL.")
