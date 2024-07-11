@@ -48,7 +48,7 @@ def count_keywords(text):
     return Counter(filtered_words)
 
 # Streamlit app
-st.title('Webpage Content Scraper and Word Cloud Generator')
+st.title('Webpage Content Scraper KeyWord Analyzer')
 
 # Input URL
 url = st.text_input('Enter the URL of the webpage:')
